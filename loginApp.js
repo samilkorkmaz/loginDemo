@@ -67,10 +67,8 @@ function sendHTML(res, htmlFileName) {
             return res.end('Error loading ' + htmlFileName);
         }
         res.writeHead(200);
-        console.log(data.length);
         res.end(data);
-    }
-    );
+    });
 }
 
 app.get('/termsAndPrivacy', function (req, res) {
