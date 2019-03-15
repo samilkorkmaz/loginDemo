@@ -41,20 +41,33 @@ app.post('/login', function (req, res) {
     //console.log(req.body);
     if (userExists(req.body)) {
         if (req.body.remember === 'on') res.cookie("userData", { email: req.body.email, loggedIn: true }); //set cookie
-        sendHTML(res, 'loggedIn.html');
+        sendHTMLWithEmail(res, 'loggedIn.html', req.body.email);
     } else {
         res.send('<h1>User name or password does not exit!</h1>');
     }
 });
 
-function sendHTML(res, htmlFileName) {
-    fs.readFile(__dirname + '/' + htmlFileName, function (err, data) {
+function sendHTMLWithEmail(res, htmlFileName, email) {
+    fs.readFile(__dirname + '/' + htmlFileName, 'utf8', function (err, data) {
         if (err) {
             res.writeHead(500);
             return res.end('Error loading ' + htmlFileName);
         }
         res.writeHead(200);
-        console.log(data);
+        var modifiedData = data.replace("Logged in", email + " logged in");
+        res.end(modifiedData);
+    }
+    );
+}
+
+function sendHTML(res, htmlFileName) {
+    fs.readFile(__dirname + '/' + htmlFileName, 'utf8', function (err, data) {
+        if (err) {
+            res.writeHead(500);
+            return res.end('Error loading ' + htmlFileName);
+        }
+        res.writeHead(200);
+        console.log(data.length);
         res.end(data);
     }
     );
@@ -71,7 +84,7 @@ app.get('/', function (req, res) {
         sendHTML(res, 'login.html');
     } else {
         console.log(req.cookies.userData.email + " already logged in.")
-        sendHTML(res, 'loggedIn.html');
+        sendHTMLWithEmail(res, 'loggedIn.html', req.cookies.userData.email);
     }
 });
 
