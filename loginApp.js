@@ -12,7 +12,7 @@ app.use(bodyParser.json());
 app.use(express.static(__dirname)); //for image resources to load properly in HTML page.
 
 const userDataFileName = "user.json";
-var user = {emails: [], passwordHashes: []};
+var user = { emails: [], passwordHashes: [] };
 
 app.post('/register', function (req, res) {
     console.log("Registration info: ", req.body);
@@ -41,24 +41,28 @@ app.post('/login', function (req, res) {
     //console.log(req.body);
     if (userExists(req.body)) {
         if (req.body.remember === 'on') res.cookie("userData", { email: req.body.email, loggedIn: true }); //set cookie
-        sendHTML(res, 'data.html');
+        sendHTML(res, 'loggedIn.html');
     } else {
         res.send('<h1>User name or password does not exit!</h1>');
     }
 });
 
 function sendHTML(res, htmlFileName) {
-    fs.readFile(__dirname + '/' + htmlFileName,
-        function (err, data) {
-            if (err) {
-                res.writeHead(500);
-                return res.end('Error loading ' + htmlFileName);
-            }
-            res.writeHead(200);
-            res.end(data);
+    fs.readFile(__dirname + '/' + htmlFileName, function (err, data) {
+        if (err) {
+            res.writeHead(500);
+            return res.end('Error loading ' + htmlFileName);
         }
+        res.writeHead(200);
+        console.log(data);
+        res.end(data);
+    }
     );
 }
+
+app.get('/termsAndPrivacy', function (req, res) {
+    sendHTML(res, 'termsAndPrivacy.html');
+});
 
 app.get('/', function (req, res) {
     console.log("Existing cookies: ", req.cookies);
@@ -67,7 +71,7 @@ app.get('/', function (req, res) {
         sendHTML(res, 'login.html');
     } else {
         console.log(req.cookies.userData.email + " already logged in.")
-        sendHTML(res, 'data.html');
+        sendHTML(res, 'loggedIn.html');
     }
 });
 
@@ -99,7 +103,7 @@ function userExists(userData) {
 
 http.listen(3000, function () {
     console.log('listening on *:3000');
-    if (fs.existsSync(userDataFileName)) {        
+    if (fs.existsSync(userDataFileName)) {
         fs.readFile(userDataFileName, function read(err, data) {
             if (err) {
                 throw err;
