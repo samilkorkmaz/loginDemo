@@ -1,6 +1,7 @@
 //Simple login demo. This is the server side NodeJS script.
-const express = require('express')
-const app = express()
+const express = require('express');
+const app = express();
+const bcrypt = require('bcrypt');
 var http = require('http').Server(app);
 var fs = require('fs');
 var cookieParser = require('cookie-parser');
@@ -11,24 +12,24 @@ app.use(bodyParser.json());
 app.use(express.static(__dirname)); //for image resources to load properly in HTML page.
 
 app.post('/register', function (req, res) {
-    console.log("Registration info: ", req.body);   
-    for(var i=0; i<user.emails.length; i++) {
+    console.log("Registration info: ", req.body);
+    for (var i = 0; i < user.emails.length; i++) {
         if (req.body.email === user.emails[i]) {
-            res.send("<h1>Email " + req.body.email +" already exists.</h1>");
+            res.send("<h1>Email " + req.body.email + " already exists.</h1>");
             return;
-        } 
+        }
     }
-    console.log("Adding " + req.body.email);
+    var hash = bcrypt.hashSync(req.body.password, 10);
+    console.log("Added " + req.body.email + ", pass: " + req.body.password + ", hash: " + hash);
     user.emails.push(req.body.email);
-    user.passwords.push(req.body.password);
-    res.send("<h1>" + req.body.email +" registered.</h1>");
-
+    user.passwordHashes.push(hash);
+    res.send("<h1>" + req.body.email + " registered with hash:" + hash + ".</h1>");
 });
 
 app.post('/login', function (req, res) {
     console.log(req.body);
     if (userExists(req.body)) {
-        if (req.body.remember === 'on') res.cookie("userData", { name:req.body.name, loggedIn: true }); //set cookie
+        if (req.body.remember === 'on') res.cookie("userData", { name: req.body.name, loggedIn: true }); //set cookie
         sendHTML(res, 'data.html');
     } else {
         res.send('<h1>User name or password does not exit!</h1>');
@@ -50,7 +51,7 @@ function sendHTML(res, htmlFileName) {
 
 var user = {
     emails: ["samil", "murat"],
-    passwords: ["12", "34"]
+    passwordHashes: ["12", "34"]
 };
 
 
@@ -75,12 +76,14 @@ app.get('/showRegistrationForm', function (req, res) {
 
 function userExists(userData) {
     console.log("Checking if " + userData.email + " exists.");
-    for(var i=0; i<user.emails.length; i++) {
-        console.log("Checking " + user.emails[i] + ", " + user.passwords[i])
-        if (userData.email === user.emails[i] && userData.password === user.passwords[i]) {
-            console.log(userData.email + " matched.");
-            return true;
-        } 
+    for (var i = 0; i < user.emails.length; i++) {
+        console.log("Checking " + user.emails[i] + ", " + user.passwordHashes[i]);
+        if (userData.email === user.emails[i]) {
+            if (bcrypt.compareSync(userData.password, user.passwordHashes[i])) {
+                console.log(userData.email + " matched.");
+                return true;
+            } 
+        }
     }
     return false;
 }
