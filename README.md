@@ -1,1 +1,1 @@
-Simple nodejs login demo with cookies
+Simple nodejs login demo with cookies. This is the absolute minimum and should not be used in applications requiring security. Note that in login.html we have to use HTTP POST (not GET. This line in login.html: form action="/login" method="post" ) so that user name and pass is not displayed in browser address bar!
