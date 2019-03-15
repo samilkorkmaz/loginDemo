@@ -1,0 +1,16 @@
+{
+  "name": "login",
+  "version": "1.0.0",
+  "description": "",
+  "main": "loginApp.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "express": "latest",
+    "cookie-parser": "latest",
+    "body-parser": "latest"
+  },
+  "author": "",
+  "license": "ISC"
+}
