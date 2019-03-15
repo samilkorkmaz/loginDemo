@@ -38,9 +38,9 @@ app.post('/register', function (req, res) {
 });
 
 app.post('/login', function (req, res) {
-    console.log(req.body);
+    //console.log(req.body);
     if (userExists(req.body)) {
-        if (req.body.remember === 'on') res.cookie("userData", { name: req.body.name, loggedIn: true }); //set cookie
+        if (req.body.remember === 'on') res.cookie("userData", { email: req.body.email, loggedIn: true }); //set cookie
         sendHTML(res, 'data.html');
     } else {
         res.send('<h1>User name or password does not exit!</h1>');
@@ -66,7 +66,7 @@ app.get('/', function (req, res) {
         console.log("Not logged in.");
         sendHTML(res, 'login.html');
     } else {
-        console.log(req.cookies.userData.name + " already logged in.")
+        console.log(req.cookies.userData.email + " already logged in.")
         sendHTML(res, 'data.html');
     }
 });
@@ -99,14 +99,14 @@ function userExists(userData) {
 
 http.listen(3000, function () {
     console.log('listening on *:3000');
-    if (fs.existsSync(userDataFileName)) {
-        console.log("reading user data...");
+    if (fs.existsSync(userDataFileName)) {        
         fs.readFile(userDataFileName, function read(err, data) {
             if (err) {
                 throw err;
             }
             user = JSON.parse(data);
-            console.log(user);
+            console.log("Read user data.");
+            //console.log(user);
         });
     }
 });
