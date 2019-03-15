@@ -11,6 +11,9 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use(express.static(__dirname)); //for image resources to load properly in HTML page.
 
+const userDataFileName = "user.json";
+var user = {emails: [], passwordHashes: []};
+
 app.post('/register', function (req, res) {
     console.log("Registration info: ", req.body);
     for (var i = 0; i < user.emails.length; i++) {
@@ -20,10 +23,18 @@ app.post('/register', function (req, res) {
         }
     }
     var hash = bcrypt.hashSync(req.body.password, 10);
-    console.log("Added " + req.body.email + ", pass: " + req.body.password + ", hash: " + hash);
+    console.log("Added " + req.body.email);
     user.emails.push(req.body.email);
     user.passwordHashes.push(hash);
-    res.send("<h1>" + req.body.email + " registered with hash:" + hash + ".</h1>");
+    json = JSON.stringify(user);
+    fs.writeFile(userDataFileName, json, 'utf8', function (err, data) {
+        if (err) {
+            console.log(err);
+        } else {
+            console.log(userDataFileName + " updated.");
+        }
+    });
+    res.send("<h1>" + req.body.email + " registered.</h1>");
 });
 
 app.post('/login', function (req, res) {
@@ -49,12 +60,6 @@ function sendHTML(res, htmlFileName) {
     );
 }
 
-var user = {
-    emails: ["samil", "murat"],
-    passwordHashes: ["12", "34"]
-};
-
-
 app.get('/', function (req, res) {
     console.log("Existing cookies: ", req.cookies);
     if (req.cookies.userData === undefined || !req.cookies.userData.loggedIn) {
@@ -76,18 +81,32 @@ app.get('/showRegistrationForm', function (req, res) {
 
 function userExists(userData) {
     console.log("Checking if " + userData.email + " exists.");
-    for (var i = 0; i < user.emails.length; i++) {
-        console.log("Checking " + user.emails[i] + ", " + user.passwordHashes[i]);
-        if (userData.email === user.emails[i]) {
-            if (bcrypt.compareSync(userData.password, user.passwordHashes[i])) {
-                console.log(userData.email + " matched.");
-                return true;
-            } 
+    if (fs.existsSync(userDataFileName)) {
+        for (var i = 0; i < user.emails.length; i++) {
+            console.log("Checking hash for " + user.emails[i]);
+            if (userData.email === user.emails[i]) {
+                if (bcrypt.compareSync(userData.password, user.passwordHashes[i])) {
+                    console.log(userData.email + " matched.");
+                    return true;
+                }
+            }
         }
+    } else {
+        console.log(userDataFileName + " does not exist. Not checking.")
     }
     return false;
 }
 
 http.listen(3000, function () {
     console.log('listening on *:3000');
+    if (fs.existsSync(userDataFileName)) {
+        console.log("reading user data...");
+        fs.readFile(userDataFileName, function read(err, data) {
+            if (err) {
+                throw err;
+            }
+            user = JSON.parse(data);
+            console.log(user);
+        });
+    }
 });
