@@ -10,6 +10,11 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use(express.static(__dirname)); //for image resources to load properly in HTML page.
 
+app.post('/register', function (req, res) {
+    console.log("Registration info: ", req.body);
+    res.send("<h1>Registration info:" + JSON.stringify(req.body) + "</h1>");
+});
+
 app.post('/login', function (req, res) {
     console.log(req.body);
     if (userExists(req.body)) {
@@ -52,11 +57,6 @@ app.get('/logout', function (req, res) {
 
 app.get('/showRegistrationForm', function (req, res) {
     sendHTML(res, 'register.html');
-});
-
-app.get('/register', function (req, res) {
-    console.log("Registration info: ", req.query);
-    res.send("<h1>regitration info:" + JSON.stringify(req.query) + "</h1>");
 });
 
 function userExists(userData) {
