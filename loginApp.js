@@ -11,8 +11,7 @@ app.use(bodyParser.json());
 app.use(express.static(__dirname)); //for image resources to load properly in HTML page.
 
 app.post('/register', function (req, res) {
-    console.log("Registration info: ", req.body);    
-    //Add user if name does not exist
+    console.log("Registration info: ", req.body);   
     for(var i=0; i<user.emails.length; i++) {
         if (req.body.email === user.emails[i]) {
             res.send("<h1>Email " + req.body.email +" already exists.</h1>");
